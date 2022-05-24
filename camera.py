@@ -34,8 +34,7 @@ def move_to_face(pos):
         return
 
     ohbot.move(HEADTURN, currentX, spd=speed)
-    ohbot.move(HEADNOD, currentY, spd=speed)
-    
+    ohbot.move(HEADNOD, currentY, spd=speed)   
 
 
 def detect_face(frame):
