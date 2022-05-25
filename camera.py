@@ -5,6 +5,8 @@ import mediapipe as mp
 import math
 import os
 import time
+import random
+import threading
 
 HORIZONTAL_FOV = 70.42
 VERTICAL_FOV = 43.3
@@ -25,7 +27,7 @@ CAMERA_HEIGHT = 1080
 
 SPEED = 10
 SPEED_LIMIT = 10
-DISTANCE_TRESHOLD = 0.05
+DISTANCE_TRESHOLD = 0.2
 
 DIRECTION = -1
 OHBOT_ROT_LIMIT = 10
@@ -46,6 +48,18 @@ ohbot.move(HEADTURN, 5)
 ohbot.move(HEADNOD, 5)
 ohbot.wait(5)
 print("Ohbot resetted!")
+
+
+def blinkLids():
+    while True:
+        ohbot.move(LIDBLINK, 0, spd = 10)
+        ohbot.wait(0.1)
+        ohbot.move(LIDBLINK, 10, spd=10)
+        ohbot.wait(0.1)
+        ohbot.wait(random.randrange(2,10))
+
+t1 = threading.Thread(target=blinkLids, args=())
+t1.start()
 
 def direct_move_to_target(x, y, speed):
     currentMotorXRotation = ohbot.motorPos[HEADTURN]
@@ -70,6 +84,8 @@ def move_to_face(pos, img):
     else:
         face_x = pos.xmin + pos.width / 2
         face_y = pos.ymin + pos.height / 3
+        ohbot.move(EYETURN, (1 - face_x) * 10)
+        ohbot.move(EYETILT, (1 - face_y) * 10)
 
     x_distance = abs(0.5 - face_x)
     y_distance = abs(0.5 - face_y)
@@ -77,9 +93,6 @@ def move_to_face(pos, img):
 
     speed_x = max(min(x_distance * SPEED, SPEED_LIMIT), 0.1)
     speed_y = max(min(y_distance * SPEED, SPEED_LIMIT), 0.1)
-
-    ohbot.move(EYETURN, (1-face_x)*7)
-    ohbot.move(EYETILT, (1-face_y)*7)
 
     if x_distance > DISTANCE_TRESHOLD:
         dir_x = -(face_x - 0.5) / x_distance
@@ -119,9 +132,9 @@ def detect_face(frame):
     detected_face = None
     if results.detections:
         for id, detection in enumerate(results.detections):
-            if detection.location_data.relative_bounding_box.xmin>0.01 and detection.location_data.relative_bounding_box.ymin>0.01:
-                #mp_draw.draw_detection(frame, detection)
-                detected_face = detection.location_data.relative_bounding_box
+            #if detection.location_data.relative_bounding_box.xmin>0.01 and detection.location_data.relative_bounding_box.ymin>0.01:
+            #mp_draw.draw_detection(frame, detection)
+            detected_face = detection.location_data.relative_bounding_box
 
     return detected_face, frame
 
