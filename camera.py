@@ -69,7 +69,7 @@ def move_to_face(pos, img):
         face_y = 0.5
     else:
         face_x = pos.xmin + pos.width / 2
-        face_y = pos.ymin + pos.height / 2
+        face_y = pos.ymin + pos.height / 3
 
     x_distance = abs(0.5 - face_x)
     y_distance = abs(0.5 - face_y)
@@ -78,15 +78,18 @@ def move_to_face(pos, img):
     speed_x = max(min(x_distance * SPEED, SPEED_LIMIT), 0.1)
     speed_y = max(min(y_distance * SPEED, SPEED_LIMIT), 0.1)
 
+    ohbot.move(EYETURN, (1-face_x)*7)
+    ohbot.move(EYETILT, (1-face_y)*7)
+
     if x_distance > DISTANCE_TRESHOLD:
         dir_x = -(face_x - 0.5) / x_distance
-        cur_x_rotation += 0.5 * dir_x*x_distance
+        cur_x_rotation += 3*dir_x*(x_distance**2)
         cur_x_rotation = max(min(OHBOT_ROT_LIMIT, cur_x_rotation), 0)
         ohbot.move(HEADTURN, cur_x_rotation, spd=speed_x)
 
     if y_distance > DISTANCE_TRESHOLD:
         dir_y = -(face_y - 0.5) / y_distance
-        cur_y_rotation += 0.5 * dir_y * y_distance
+        cur_y_rotation += 3*dir_y * (y_distance**2)
         cur_y_rotation = max(min(OHBOT_ROT_LIMIT, cur_y_rotation), 0)
         ohbot.move(HEADNOD, cur_y_rotation, spd=speed_y)
 
@@ -103,6 +106,7 @@ def move_to_face(pos, img):
     ]
 
     for i, text in enumerate(texts):
+        continue
         img = cv2.putText(img, text, (50, start_y+50*i), font, font_scale, color, thickness=thickness)
 
     cv2.imshow("camera_0", img)
@@ -116,7 +120,7 @@ def detect_face(frame):
     if results.detections:
         for id, detection in enumerate(results.detections):
             if detection.location_data.relative_bounding_box.xmin>0.01 and detection.location_data.relative_bounding_box.ymin>0.01:
-                mp_draw.draw_detection(frame, detection)
+                #mp_draw.draw_detection(frame, detection)
                 detected_face = detection.location_data.relative_bounding_box
 
     return detected_face, frame
