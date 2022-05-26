@@ -27,7 +27,7 @@ CAMERA_HEIGHT = 1080
 
 SPEED = 10
 SPEED_LIMIT = 10
-DISTANCE_TRESHOLD = 0.2
+DISTANCE_TRESHOLD = 0.1
 
 DIRECTION = -1
 OHBOT_ROT_LIMIT = 10
@@ -49,6 +49,8 @@ ohbot.move(HEADNOD, 5)
 ohbot.wait(5)
 print("Ohbot resetted!")
 
+last_photo_time = time.time()
+PHOTO_INTERVAL = 5
 
 def blinkLids():
     while True:
@@ -126,6 +128,8 @@ def move_to_face(pos, img):
 
 
 def detect_face(frame):
+    global last_photo_time
+
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = face_detection.process(imgRGB)
 
@@ -133,9 +137,16 @@ def detect_face(frame):
     if results.detections:
         for id, detection in enumerate(results.detections):
             #if detection.location_data.relative_bounding_box.xmin>0.01 and detection.location_data.relative_bounding_box.ymin>0.01:
-            #mp_draw.draw_detection(frame, detection)
+            mp_draw.draw_detection(frame, detection)
             detected_face = detection.location_data.relative_bounding_box
-
+            if time.time()-last_photo_time>PHOTO_INTERVAL:
+                face = frame[int(detected_face.ymin*CAMERA_HEIGHT):int((detected_face.ymin+detected_face.height)*CAMERA_HEIGHT), int(detected_face.xmin*CAMERA_WIDTH):int((detected_face.xmin+detected_face.width)*CAMERA_WIDTH)]
+                if detected_face.xmin>0.1 and detected_face.ymin>0.1 and detected_face.xmin+detected_face.width<0.9 and detected_face.ymin+detected_face.height< 0.9:
+                    cv2.imshow("face", face)
+                    img_id = random.randrange(0, 100000000)
+                    cv2.imwrite(f"faces/face_{img_id}.jpg", face)
+                    print("Face photo taken!")
+                last_photo_time = time.time()
     return detected_face, frame
 
 while True:
