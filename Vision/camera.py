@@ -15,6 +15,7 @@ VERTICAL_MOVE_SCALE = (VERTICAL_FOV/90) * 10
 HORIZONTAL_MOVE_SCALE = (HORIZONTAL_FOV/180) * 10
 
 BLINKING = False
+TAKE_PHOTOS = False
 
 HEADNOD = 0
 HEADTURN = 1
@@ -144,7 +145,7 @@ def detect_face(frame):
             detected_face = detection.location_data.relative_bounding_box
             if time.time()-last_photo_time>PHOTO_INTERVAL:
                 face = img_save[int(detected_face.ymin*CAMERA_HEIGHT):int((detected_face.ymin+detected_face.height)*CAMERA_HEIGHT), int(detected_face.xmin*CAMERA_WIDTH):int((detected_face.xmin+detected_face.width)*CAMERA_WIDTH)]
-                if detected_face.xmin>0.1 and detected_face.ymin>0.1 and detected_face.xmin+detected_face.width<0.9 and detected_face.ymin+detected_face.height< 0.9:
+                if detected_face.xmin>0.1 and detected_face.ymin>0.1 and detected_face.xmin+detected_face.width<0.9 and detected_face.ymin+detected_face.height< 0.9 and TAKE_PHOTOS:
                     cv2.imshow("face", face)
                     img_id = random.randrange(0, 100000000)
                     cv2.imwrite(f"faces/face_{img_id}.jpg", face)
